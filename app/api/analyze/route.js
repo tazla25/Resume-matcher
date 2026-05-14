@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
-import { PDFParse } from 'pdf-parse'
+import pdfParse from 'pdf-parse'
 
 // Simple keyword extractor to simulate AI analysis
 function extractKeywords(text) {
-  // Very basic word extraction (lowercase, words > 3 chars, remove common stop words)
-  const words = text.toLowerCase().match(/\b[a-z]{4,}\b/g) || []
+  // Very basic word extraction (lowercase, words > 1 chars, remove common stop words)
+  const words = text.toLowerCase().match(/\b[a-z]{2,}\b/g) || []
   const stopWords = new Set(['this', 'that', 'with', 'from', 'your', 'have', 'more', 'will', 'about'])
 
   const keywords = new Set()
@@ -36,13 +36,16 @@ function analyzeResume(resumeText, jdText) {
   let score = jdKeywords.length > 0 ? Math.round((matchCount / jdKeywords.length) * 100) : 0
 
   // Basic ATS check: length and formatting clues (stubbed)
-  const atsCompatible = resumeText.length > 200 && !resumeText.includes('') // Simple heuristic
+  const hasKeywords = /experience|education|skills|work|project/i.test(resumeText)
+  const atsCompatible = resumeText.length > 500 && hasKeywords ? "Yes" : "No"
+  const atsReason = atsCompatible === "Yes" ? "Contains expected sections" : "Missing key sections or too short"
 
   return {
     score,
     strengths: matchedSkills.slice(0, 5), // Top 5
     missingSkills: missingSkills.slice(0, 5), // Top 5 missing
-    atsCompatible
+    atsCompatible,
+    atsReason
   }
 }
 
@@ -71,10 +74,10 @@ export async function POST(request) {
     for (const file of files) {
       try {
         const buffer = Buffer.from(await file.arrayBuffer())
-        const parser = new PDFParse(buffer)
-        const data = await parser.getText()
+        const data = await pdfParse(buffer)
+        const resumeText = data.text
 
-        const analysis = analyzeResume(data.text, jobDescription)
+        const analysis = analyzeResume(resumeText, jobDescription)
 
         results.push({
           name: file.name,
