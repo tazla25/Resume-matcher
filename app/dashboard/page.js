@@ -171,10 +171,10 @@ export default function Dashboard() {
                       </div>
                       <div className="col-span-full mt-2 pt-4 border-t border-gray-100">
                         <span className="font-semibold text-gray-700 mr-2">ATS Compatible:</span>
-                        {res.atsCompatible ? (
+                        {res.atsCompatible === "Yes" ? (
                           <span className="text-green-600 font-medium bg-green-50 px-2 py-1 rounded">Yes ✓</span>
                         ) : (
-                          <span className="text-yellow-600 font-medium bg-yellow-50 px-2 py-1 rounded">Needs Improvement ⚠</span>
+                          <span className="text-yellow-600 font-medium bg-yellow-50 px-2 py-1 rounded">No ({res.atsReason}) ⚠</span>
                         )}
                       </div>
                     </div>
